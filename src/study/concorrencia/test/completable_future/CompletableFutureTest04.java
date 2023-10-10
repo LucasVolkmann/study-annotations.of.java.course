@@ -10,7 +10,7 @@ public class CompletableFutureTest04 {
     public static void main(String[] args) {
         StoreServiceWithDiscount service = new StoreServiceWithDiscount();
 //        searchPricesWithDiscount(service);
-        serachPricesWithDiscountAsync(service);
+        searchPricesWithDiscountAsync(service);
     }
 
 
@@ -40,7 +40,7 @@ public class CompletableFutureTest04 {
         System.out.printf("Time passed to [searchPricesWithDiscount] %dms%n", (end - start));
     }
 
-    private static void serachPricesWithDiscountAsync(StoreServiceWithDiscount service) {
+    private static void searchPricesWithDiscountAsync(StoreServiceWithDiscount service) {
         long start = System.currentTimeMillis();
 
         List<String> stores = List.of("Store 1", "Store 2", "Store 3", "Store 4");
@@ -51,12 +51,16 @@ public class CompletableFutureTest04 {
 //                .map(cf -> cf.thenCompose(quote -> CompletableFuture.supplyAsync(() -> service.applyDiscount(quote))))
 //                .toList();
 
-        List<CompletableFuture<String>> list = stores.stream()
-                .map(s -> {
-                    CompletableFuture<String> cF = CompletableFuture.supplyAsync(() -> service.getPriceSync(s));
-                    CompletableFuture<Quote> quoteCF = cF.thenApply(Quote::newQuote);
-                    return quoteCF.thenCompose(quote -> CompletableFuture.supplyAsync(() -> service.applyDiscount(quote)));
-                }).toList();
+        List<CompletableFuture<String>> list =
+                stores.stream()
+
+                .map( s -> CompletableFuture.supplyAsync( () -> service.getPriceSync(s)))
+
+                .map( cf -> cf.thenApply(Quote::newQuote))
+
+                .map( cf -> cf.thenCompose( quote -> CompletableFuture.supplyAsync( () -> service.applyDiscount(quote) ) ))
+
+                .toList();
 
         list.stream()
                 .map(CompletableFuture::join)
@@ -64,6 +68,6 @@ public class CompletableFutureTest04 {
 
         long end = System.currentTimeMillis();
 
-        System.out.printf("Time passed to [serachPricesWithDiscountAsync] %dms%n", (end - start));
+        System.out.printf("Time passed to [searchPricesWithDiscountAsync] %dms%n", (end - start));
     }
 }

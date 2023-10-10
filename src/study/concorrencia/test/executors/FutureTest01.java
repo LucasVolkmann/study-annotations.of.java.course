@@ -3,22 +3,28 @@ package study.concorrencia.test.executors;
 import java.util.concurrent.*;
 
 public class FutureTest01 {
-    public static void main(String[] args) throws ExecutionException, InterruptedException, TimeoutException {
+    public static void main(String[] args){
         ExecutorService executorService = Executors.newSingleThreadExecutor();
         Future<Double> dollarRequest = executorService.submit(() -> {
 
             TimeUnit.SECONDS.sleep(5);
 
-            return 5.99;
+            return 5.99D;
         });
 
         System.out.println(doSomething() + " times");
 
-        double dollarResponse = dollarRequest.get(2, TimeUnit.SECONDS);
+        Double dollarResponse = null;
+        try {
+            dollarResponse = dollarRequest.get(2, TimeUnit.SECONDS);
+        } catch (InterruptedException | ExecutionException | TimeoutException e) {
+            e.printStackTrace();
+        } finally {
+            executorService.shutdown();
+        }
 
         System.out.println("Dollar: " + dollarResponse);
 
-        executorService.shutdown();
     }
 
     private static double doSomething(){
