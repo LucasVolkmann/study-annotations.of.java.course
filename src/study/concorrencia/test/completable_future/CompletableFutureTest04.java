@@ -46,21 +46,24 @@ public class CompletableFutureTest04 {
         List<String> stores = List.of("Store 1", "Store 2", "Store 3", "Store 4");
 
 //        List<CompletableFuture<String>> list = stores.stream()
-//                .map(s -> CompletableFuture.supplyAsync(() -> service.getPriceSync(s)))
-//                .map(cf -> cf.thenApply(Quote::newQuote))
-//                .map(cf -> cf.thenCompose(quote -> CompletableFuture.supplyAsync(() -> service.applyDiscount(quote))))
-//                .toList();
+//                .map( s -> {
+//                    CompletableFuture<String> patternizedString = CompletableFuture.supplyAsync(() -> service.getPriceSync(s));
+//
+//                    CompletableFuture<Quote> quote = patternizedString.thenApply(Quote::newQuote);
+//
+//                    return quote.thenCompose(q -> CompletableFuture.supplyAsync(() -> service.applyDiscount(q)));
+//                }).toList();
 
         List<CompletableFuture<String>> list =
                 stores.stream()
 
-                .map( s -> CompletableFuture.supplyAsync( () -> service.getPriceSync(s)))
+                        .map(s -> CompletableFuture.supplyAsync(() -> service.getPriceSync(s)))
 
-                .map( cf -> cf.thenApply(Quote::newQuote))
+                        .map(cf -> cf.thenApply(Quote::newQuote))
 
-                .map( cf -> cf.thenCompose( quote -> CompletableFuture.supplyAsync( () -> service.applyDiscount(quote) ) ))
+                        .map(cf -> cf.thenCompose(quote -> CompletableFuture.supplyAsync(() -> service.applyDiscount(quote))))
 
-                .toList();
+                        .toList();
 
         list.stream()
                 .map(CompletableFuture::join)

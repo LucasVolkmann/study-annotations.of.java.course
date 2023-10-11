@@ -19,9 +19,9 @@ public class CompletableFutureTest02 {
         List<String> stores = List.of("Store 1","Store 2","Store 3","Store 4");
 
         // Lançando as Threads
-        List<CompletableFuture<Double>> completableFutures = stores.stream().map(
-                storeService::getPricesAsyncCompletableFuture
-        ).toList();
+        List<CompletableFuture<Double>> completableFutures = stores.stream()
+                .map(storeService::getPricesAsyncCompletableFuture)
+                .toList();
 
         // Coletando os resultados
         List<Double> prices = completableFutures.stream()
