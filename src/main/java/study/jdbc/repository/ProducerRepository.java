@@ -107,7 +107,7 @@ public class ProducerRepository {
 
                 // Dados alteráveis diretamente pelo RS
                 if (dbMetaData.supportsResultSetConcurrency(ResultSet.TYPE_FORWARD_ONLY,
-                        ResultSet.CONCUR_UPDATABLE)){
+                        ResultSet.CONCUR_UPDATABLE)) {
                     log.info("And supports CONCUR_UPDATABLE");
                 }
             }
@@ -118,7 +118,7 @@ public class ProducerRepository {
 
                 // Dados alteráveis diretamente pelo RS
                 if (dbMetaData.supportsResultSetConcurrency(ResultSet.TYPE_SCROLL_INSENSITIVE,
-                        ResultSet.CONCUR_UPDATABLE)){
+                        ResultSet.CONCUR_UPDATABLE)) {
                     log.info("And supports CONCUR_UPDATABLE");
                 }
             }
@@ -129,15 +129,79 @@ public class ProducerRepository {
 
                 // Dados alteráveis diretamente pelo RS
                 if (dbMetaData.supportsResultSetConcurrency(ResultSet.TYPE_SCROLL_SENSITIVE,
-                        ResultSet.CONCUR_UPDATABLE)){
+                        ResultSet.CONCUR_UPDATABLE)) {
                     log.info("And supports CONCUR_UPDATABLE");
                 }
             }
-
         } catch (SQLException e) {
             log.error("Error while trying to show driver metadata.", e);
         }
+    }
 
+    public static void showTypeScrollWorking() {
+        String sql = "SELECT * FROM anime_store.producer;";
+
+        try (Connection conn = ConnectionFactory.getConnection();
+             Statement stmt = conn.createStatement(ResultSet.TYPE_SCROLL_INSENSITIVE, ResultSet.CONCUR_UPDATABLE);
+             ResultSet rs = stmt.executeQuery(sql)) {
+
+            log.info("Last row? '{}'", rs.last());
+            log.info("Row number: '{}'", rs.getRow());
+            log.info(Producer.builder().id(rs.getInt("id")).name(rs.getString("name")).build());
+
+            log.info("First row? '{}'", rs.first());
+            log.info("Row number: '{}'", rs.getRow());
+            log.info(Producer.builder().id(rs.getInt("id")).name(rs.getString("name")).build());
+
+            log.info("Row Absolute? '{}'", rs.absolute(6));
+            log.info("Row number: '{}'", rs.getRow());
+            log.info(Producer.builder().id(rs.getInt("id")).name(rs.getString("name")).build());
+
+            log.info("Row Relative? '{}'", rs.relative(-3));
+            log.info("Row number: '{}'", rs.getRow());
+            log.info(Producer.builder().id(rs.getInt("id")).name(rs.getString("name")).build());
+
+            log.info("Is Last? '{}'", rs.isLast());
+            log.info("Row number: '{}'", rs.getRow());
+
+            log.info("Is First? '{}'", rs.isFirst());
+            log.info("Row number: '{}'", rs.getRow());
+
+            log.info("Last row? '{}'", rs.last());
+            log.info("------------------");
+            rs.next();
+            log.info("After last row? '{}'", rs.isAfterLast());
+            while (rs.previous()) {
+                log.info(Producer.builder().id(rs.getInt("id")).name(rs.getString("name")).build());
+            }
+
+        } catch (SQLException e) {
+            log.error("Error while trying to show type scroll working.", e);
+        }
+    }
+
+    public static List<Producer> findByNameAndUptdateToUpperCase(String name) {
+        String sql = "SELECT id, name FROM anime_store.producer WHERE name LIKE ('%%%s%%');"
+                .formatted(name);
+        List<Producer> producers = new ArrayList<>();
+
+        try (Connection conn = ConnectionFactory.getConnection();
+             Statement stmt = conn.createStatement(ResultSet.TYPE_SCROLL_INSENSITIVE, ResultSet.CONCUR_UPDATABLE);
+             ResultSet rs = stmt.executeQuery(sql)) {
+
+            while (rs.next()) {
+                rs.updateString("name", rs.getString("name").toUpperCase());
+                rs.updateRow();
+                Producer producer = Producer.builder()
+                        .id(rs.getInt("id"))
+                        .name(rs.getString("name"))
+                        .build();
+                producers.add(producer);
+            }
+        } catch (SQLException e) {
+            log.error("Error while trying to find by name and update to upper case.", e);
+        }
+        return producers;
     }
 
 }

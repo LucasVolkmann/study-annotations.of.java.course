@@ -23,8 +23,12 @@ public class ConnectionFactoryTest01 {
 //        log.info("Producers found: '{}'", producers);
 
 //        ProducerService.showProducerMetaData();
-        ProducerService.showDriverMetaData();
+//        ProducerService.showDriverMetaData();
+//        ProducerService.showTypeScrollWorking();
 
+        List<Producer> producers = ProducerService.findByNameAndUptdateToUpperCase("marcelo");
+        log.info("Producers found: '{}'", producers);
     }
+
 
 }
