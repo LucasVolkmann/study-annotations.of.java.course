@@ -11,6 +11,10 @@ public class ProducerService {
         ProducerRepository.save(producer);
     }
 
+    public static void saveTransaction(List<Producer> producers) {
+        ProducerRepository.saveTransaction(producers);
+    }
+
     public static void delete(Integer id) {
         requireValidId(id);
         ProducerRepository.delete(id);
@@ -61,6 +65,7 @@ public class ProducerService {
     public static List<Producer> findByNameOrInsert(String name) {
         return ProducerRepository.findByNameOrInsert(name);
     }
+
     public static void findByNameAndDelete(String name) {
         ProducerRepository.findByNameAndDelete(name);
     }
